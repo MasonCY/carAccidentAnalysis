@@ -1,6 +1,10 @@
 import wx
 import wx.adv
+from numpy import arange, sin, pi
 from datetime import datetime
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+import matplotlib.pyplot as plt
 
 class MyApp(wx.App):
     def __init__(self):
@@ -9,6 +13,7 @@ class MyApp(wx.App):
     def InitFrame(self):
         frame = MyFrame(parent=None,title="Car accident data analysis system",pos=(20,40),size=(1240,700))
         frame.Show()
+
 class MyFrame(wx.Frame):
     def __init__(self,parent, title, pos,size):
         super().__init__(parent = parent, title=title,pos=pos,size=size)
@@ -28,15 +33,26 @@ class MyFrame(wx.Frame):
         sizer.Add(notebook,1,wx.ALL|wx.EXPAND,5)
         panel.SetSizer(sizer)
         self.Show()
-class HomePanel(wx.Panel):
-    def __init__(self,parent):
+class mainPanel(wx.Panel):
+    def __init__(self, parent):
         super().__init__(parent=parent)
         self.sDate = datetime.today().strftime('%Y-%m-%d')
         self.eDate = datetime.today().strftime('%Y-%m-%d')
-        self.InitForm()
-    def InitForm(self):
-        title = wx.StaticText(parent=self,id=wx.ID_ANY,label="All accidents related to the accident type")
-        startLable = wx.StaticText(parent=self,id=wx.ID_ANY,label="start date: ")
+
+
+    def OnStartDateChanged(self, evt):
+        sel_date = evt.GetDate()
+        self.sDate = sel_date.Format("%Y-%m-%d")
+
+    def OnEndDateChanged(self, evt):
+        sel_date = evt.GetDate()
+        self.eDate = sel_date.Format("%Y-%m-%d")
+
+    def onSearch(self, event):
+        print(self.sDate, self.eDate)
+    def InitForm(self,hasType,titleT):
+        title = wx.StaticText(parent=self, id=wx.ID_ANY, label=titleT)
+        startLable = wx.StaticText(parent=self, id=wx.ID_ANY, label="start date: ")
         endLable = wx.StaticText(parent=self, id=wx.ID_ANY, label="end date: ")
         self.startDate = wx.adv.DatePickerCtrlGeneric(parent=self, id=wx.ID_ANY)
         self.Bind(wx.adv.EVT_DATE_CHANGED, self.OnStartDateChanged, self.startDate)
@@ -44,10 +60,11 @@ class HomePanel(wx.Panel):
         self.Bind(wx.adv.EVT_DATE_CHANGED, self.OnEndDateChanged, self.endDate)
         self.searchBtn = wx.Button(self, label='search')
         self.searchBtn.Bind(event=wx.EVT_BUTTON, handler=self.onSearch)
-        self.typeLable = wx.StaticText(parent=self, id=wx.ID_ANY, label="accident type: ")
-        self.type = wx.TextCtrl(parent=self)
+        if hasType:
+            self.typeLable = wx.StaticText(parent=self, id=wx.ID_ANY, label="accident type: ")
+            self.type = wx.TextCtrl(parent=self)
         self.SetBackgroundColour("#A8DADC")
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         menuSizer = wx.BoxSizer(wx.HORIZONTAL)
         titleSizer = wx.BoxSizer(wx.HORIZONTAL)
         titleSizer.Add(title, proportion=0, flag=wx.ALL, border=5)
@@ -55,157 +72,81 @@ class HomePanel(wx.Panel):
         firstRowSizer = wx.BoxSizer(wx.HORIZONTAL)
         firstRowSizer.Add(startLable, proportion=0, flag=wx.ALL, border=5)
         firstRowSizer.Add(self.startDate, proportion=0, flag=wx.ALL, border=5)
-        firstRowSizer.Add(self.typeLable, proportion=0, flag=wx.ALL, border=5)
-        firstRowSizer.Add(self.type, proportion=0, flag=wx.ALL, border=5)
+        if hasType:
+            firstRowSizer.Add(self.typeLable, proportion=0, flag=wx.ALL, border=5)
+            firstRowSizer.Add(self.type, proportion=0, flag=wx.ALL, border=5)
 
         secondRowSizer = wx.BoxSizer(wx.HORIZONTAL)
         secondRowSizer.Add(endLable, proportion=0, flag=wx.ALL, border=5)
-        secondRowSizer.Add(self.endDate,proportion=0, flag=wx.ALL, border=5)
+        secondRowSizer.Add(self.endDate, proportion=0, flag=wx.ALL, border=5)
         secondRowSizer.Add(self.searchBtn, proportion=0, flag=wx.ALL, border=5)
 
-        mainSizer.Add(menuSizer, proportion=0, flag=wx.ALL, border=2)
-        mainSizer.Add(titleSizer, proportion=0, flag=wx.ALL | wx.CENTER, border=2)
-        mainSizer.Add(firstRowSizer, proportion=0, flag=wx.ALL, border=2)
-        mainSizer.Add(secondRowSizer, proportion=0, flag=wx.ALL, border=2)
+        self.mainSizer.Add(menuSizer, proportion=0, flag=wx.ALL, border=2)
+        self.mainSizer.Add(titleSizer, proportion=0, flag=wx.ALL | wx.CENTER, border=2)
+        self.mainSizer.Add(firstRowSizer, proportion=0, flag=wx.ALL, border=2)
+        self.mainSizer.Add(secondRowSizer, proportion=0, flag=wx.ALL, border=2)
 
 
-        self.SetSizer(mainSizer)
-        mainSizer.Fit(self)
+class HomePanel(mainPanel):
+    def __init__(self,parent):
+        super().__init__(parent=parent)
+        self.InitForm(True,"All accidents related to the accident type")
+        self.figure = Figure()
+        self.axes = self.figure.add_subplot(111)
+        self.canvas = FigureCanvas(self,-1,self.figure)
+        self.mainSizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
+        self.SetSizer(self.mainSizer)
+        self.mainSizer.Fit(self)
         self.Layout()
-    def OnStartDateChanged(self,evt):
-        sel_date = evt.GetDate()
-        self.sDate = sel_date.Format("%Y-%m-%d")
 
-    def OnEndDateChanged(self,evt):
-        sel_date = evt.GetDate()
-        self.eDate = sel_date.Format("%Y-%m-%d")
+    def draw(self):
+        t = arange(0.0, 3.0, 0.01)
+        s = sin(2 * pi * t)
+        plt.plot(t, s)
+        plt.ylabel('co2')
+        plt.xlabel('year')
+        plt.show()
 
     def onSearch(self, event):
-        print(self.sDate,self.eDate)
-
-
-class AccidentPanel(wx.Panel):
+        self.draw()
+        print(self.sDate)
+class AccidentPanel(mainPanel):
     def __init__(self,parent):
         super().__init__(parent=parent)
-        self.InitForm()
-    def InitForm(self):
-        title = wx.StaticText(parent=self,id=wx.ID_ANY,label="The amount of accidents per hour of the day(on average)")
-        startLable = wx.StaticText(parent=self,id=wx.ID_ANY,label="start date: ")
-        endLable = wx.StaticText(parent=self, id=wx.ID_ANY, label="end date: ")
-        # self.startDate= wx.DateTime(parent=self,id=wx.ID_ANY)
-        self.startDate = wx.adv.DatePickerCtrlGeneric(parent=self, id=wx.ID_ANY,name='mydate')
-        self.endDate = wx.adv.DatePickerCtrlGeneric(parent=self, id=wx.ID_ANY)
-        self.searchBtn = wx.Button(self, label='search')
+        self.InitForm(False,"The amount of accidents per hour of the day(on average)")
 
-        self.SetBackgroundColour("#A8DADC")
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-        menuSizer = wx.BoxSizer(wx.HORIZONTAL)
-        titleSizer = wx.BoxSizer(wx.HORIZONTAL)
-        titleSizer.Add(title, proportion=0, flag=wx.ALL, border=5)
-
-        firstRowSizer = wx.BoxSizer(wx.HORIZONTAL)
-        firstRowSizer.Add(startLable, proportion=0, flag=wx.ALL, border=5)
-        firstRowSizer.Add(self.startDate, proportion=0, flag=wx.ALL, border=5)
-
-
-        secondRowSizer = wx.BoxSizer(wx.HORIZONTAL)
-        secondRowSizer.Add(endLable, proportion=0, flag=wx.ALL, border=5)
-        secondRowSizer.Add(self.endDate, proportion=0, flag=wx.ALL, border=5)
-        secondRowSizer.Add(self.searchBtn, proportion=0, flag=wx.ALL, border=5)
-
-        mainSizer.Add(menuSizer, proportion=0, flag=wx.ALL, border=2)
-        mainSizer.Add(titleSizer, proportion=0, flag=wx.ALL | wx.CENTER, border=2)
-        mainSizer.Add(firstRowSizer, proportion=0, flag=wx.ALL, border=2)
-        mainSizer.Add(secondRowSizer, proportion=0, flag=wx.ALL, border=2)
-
-
-        self.SetSizer(mainSizer)
-        mainSizer.Fit(self)
+        self.SetSizer(self.mainSizer)
+        self.mainSizer.Fit(self)
         self.Layout()
 
+    def onSearch(self, event):
 
 
-class AlcoholPanel(wx.Panel):
+        print(self.sDate)
+class AlcoholPanel(mainPanel):
     def __init__(self,parent):
         super().__init__(parent=parent)
-        self.InitForm()
-    def InitForm(self):
-        title = wx.StaticText(parent=self,id=wx.ID_ANY,label="The trends of the number of alcohol-related accidents throughout the time ")
-        startLable = wx.StaticText(parent=self,id=wx.ID_ANY,label="start date: ")
-        endLable = wx.StaticText(parent=self, id=wx.ID_ANY, label="end date: ")
-        self.startDate = wx.adv.DatePickerCtrlGeneric(parent=self, id=wx.ID_ANY)
-        self.endDate = wx.adv.DatePickerCtrlGeneric(parent=self, id=wx.ID_ANY)
-        self.searchBtn = wx.Button(self, label='search')
-        self.searchBtn .Bind(event=wx.EVT_BUTTON, handler=self.onSearch)
-        self.typeLable = wx.StaticText(parent=self, id=wx.ID_ANY, label="accident type: ")
-        self.type = wx.TextCtrl(parent=self)
-        self.SetBackgroundColour("#A8DADC")
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-        menuSizer = wx.BoxSizer(wx.HORIZONTAL)
-        titleSizer = wx.BoxSizer(wx.HORIZONTAL)
-        titleSizer.Add(title, proportion=0, flag=wx.ALL, border=5)
+        self.InitForm(True,"The trends of the number of alcohol-related accidents throughout the time ")
 
-        firstRowSizer = wx.BoxSizer(wx.HORIZONTAL)
-        firstRowSizer.Add(startLable, proportion=0, flag=wx.ALL, border=5)
-        firstRowSizer.Add(self.startDate, proportion=0, flag=wx.ALL, border=5)
-        firstRowSizer.Add(self.typeLable, proportion=0, flag=wx.ALL, border=5)
-        firstRowSizer.Add(self.type, proportion=0, flag=wx.ALL, border=5)
-
-        secondRowSizer = wx.BoxSizer(wx.HORIZONTAL)
-        secondRowSizer.Add(endLable, proportion=0, flag=wx.ALL, border=5)
-        secondRowSizer.Add(self.endDate, proportion=0, flag=wx.ALL, border=5)
-        secondRowSizer.Add(self.searchBtn, proportion=0, flag=wx.ALL, border=5)
-
-        mainSizer.Add(menuSizer, proportion=0, flag=wx.ALL, border=2)
-        mainSizer.Add(titleSizer, proportion=0, flag=wx.ALL | wx.CENTER, border=2)
-        mainSizer.Add(firstRowSizer, proportion=0, flag=wx.ALL, border=2)
-        mainSizer.Add(secondRowSizer, proportion=0, flag=wx.ALL, border=2)
-
-
-        self.SetSizer(mainSizer)
-        mainSizer.Fit(self)
+        self.SetSizer(self.mainSizer)
+        self.mainSizer.Fit(self)
         self.Layout()
-    def onSearch(self,event):
-        print(self.startDate)
-        print(self.endDate)
+    def onSearch(self, event):
 
-class TypePanel(wx.Panel):
+
+        print(self.sDate)
+class TypePanel(mainPanel):
     def __init__(self,parent):
         super().__init__(parent=parent)
-        self.InitForm()
-    def InitForm(self):
-        title = wx.StaticText(parent=self,id=wx.ID_ANY,label="Overall number of accidents for each accident type")
-        startLable = wx.StaticText(parent=self,id=wx.ID_ANY,label="start date: ")
-        endLable = wx.StaticText(parent=self, id=wx.ID_ANY, label="end date: ")
-        # self.startDate= wx.DateTime(parent=self,id=wx.ID_ANY)
-        self.startDate = wx.adv.DatePickerCtrlGeneric(parent=self, id=wx.ID_ANY)
-        self.endDate = wx.adv.DatePickerCtrlGeneric(parent=self, id=wx.ID_ANY)
-        self.searchBtn = wx.Button(self, label='search')
+        self.InitForm(False,"Overall number of accidents for each accident type")
 
-        self.SetBackgroundColour("#A8DADC")
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-        menuSizer = wx.BoxSizer(wx.HORIZONTAL)
-        titleSizer = wx.BoxSizer(wx.HORIZONTAL)
-        titleSizer.Add(title, proportion=0, flag=wx.ALL, border=5)
-        firstRowSizer = wx.BoxSizer(wx.HORIZONTAL)
-        firstRowSizer.Add(startLable, proportion=0, flag=wx.ALL, border=5)
-        firstRowSizer.Add(self.startDate, proportion=0, flag=wx.ALL, border=5)
-
-
-        secondRowSizer = wx.BoxSizer(wx.HORIZONTAL)
-        secondRowSizer.Add(endLable, proportion=0, flag=wx.ALL, border=5)
-        secondRowSizer.Add(self.endDate, proportion=0, flag=wx.ALL, border=5)
-        secondRowSizer.Add(self.searchBtn, proportion=0, flag=wx.ALL, border=5)
-
-
-        mainSizer.Add(menuSizer, proportion=0, flag=wx.ALL, border=2)
-        mainSizer.Add(titleSizer, proportion=0, flag=wx.ALL | wx.CENTER, border=2)
-        mainSizer.Add(firstRowSizer, proportion=0, flag=wx.ALL, border=2)
-        mainSizer.Add(secondRowSizer, proportion=0, flag=wx.ALL, border=2)
-
-        self.SetSizer(mainSizer)
-        mainSizer.Fit(self)
+        self.SetSizer(self.mainSizer)
+        self.mainSizer.Fit(self)
         self.Layout()
+    def onSearch(self, event):
+
+        print(self.sDate)
+
 if __name__ == "__main__":
     app = MyApp()
     app.MainLoop()
