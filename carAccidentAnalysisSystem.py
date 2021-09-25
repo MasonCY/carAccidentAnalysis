@@ -27,6 +27,8 @@ def getColNameList():
     cur = cnn.cursor()
     cur.execute("SELECT * FROM crash")
     names = [description[0] for description in cur.description]
+    names.pop()
+    names.pop()
     return names
 """calculate the total number of records"""
 def data_rows_count(rows):
@@ -130,7 +132,7 @@ class HomePanel(mainPanel):
         self.InitForm(True,"All accidents related to the accident type")
 
         self.grid_1 = Grid(self)
-        self.grid_1.CreateGrid(0, 65)
+        self.grid_1.CreateGrid(0, 63)
         self.grid_1.EnableEditing(False)
         nameList = getColNameList()
         i = 0
