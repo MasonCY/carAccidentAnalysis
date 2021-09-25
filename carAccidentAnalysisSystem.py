@@ -370,7 +370,7 @@ class TypePanel(mainPanel):
 
         self.SetSizer(self.mainSizer)
         self.mainSizer.Fit(self)
-        # self.initiatePicture('3.png')
+        self.initiatePicture('3.png')
         self.Layout()
     def drawTable(self):
         connection = connect()
