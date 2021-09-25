@@ -268,7 +268,7 @@ class AccidentPanel(mainPanel):
 
         plt.xticks(x_pos,xVlues)
         plt.legend()
-        plt.xlabel("Hours-AM/PM [" + self.sDate +'-----'+ self.eDate+']')
+        plt.xlabel("Hours-AM/PM [" + self.sDate +'-----'+ self.eDate+']' + '     Total days:' + str(days))
         plt.ylabel("Average accident data")
 
         figure = plt.gcf()
