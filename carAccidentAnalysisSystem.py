@@ -30,10 +30,6 @@ def getColNameList():
     return names
 """calculate the total number of records"""
 def data_rows_count(rows):
-       # con = connect()
-       # cur=con.cursor()
-       # cur.execute("SELECT * FROM crash")
-       # rows=cur.fetchall()
        i=0
        for r in rows:
            i+=1
@@ -44,7 +40,6 @@ class MyApp(wx.App):
         self.InitFrame()
     def InitFrame(self):
         frame = MyFrame(parent=None,title="Car accident data analysis system",pos=(20,40),size=(1240,700),)
-        # frame.Show()
         frame.setFrame(frame)
 class MyFrame(wx.Frame):
     def __init__(self,parent, title, pos,size):
@@ -78,8 +73,6 @@ class mainPanel(wx.Panel):
     def initiatePicture(self, imgName):
         image_name = imgName
         img = wx.Image(image_name, wx.BITMAP_TYPE_PNG)
-
-        # img = img.Scale(1200,500)
         self.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
         self.imageCtrl.Refresh()
         self.Refresh()
@@ -91,13 +84,6 @@ class mainPanel(wx.Panel):
         sel_date = evt.GetDate()
         self.eDate = sel_date.Format("%Y/%m/%d")
         print(self.eDate)
-    def dbSelect(self):
-        connection = sqlite3.connect("carCrash.sqlite")
-        cursor = connection.cursor()
-        cursor.execute("SELECT * from crash where ACCIDENT_TYPE == 'Struck animal' ")
-        result = cursor.fetchall()
-        print(result)
-        connection.close()
     def onSearch(self, event):
         self.dbSelect()
         print(self.sDate, self.eDate)
@@ -143,9 +129,6 @@ class HomePanel(mainPanel):
         super().__init__(parent=parent)
         self.InitForm(True,"All accidents related to the accident type")
 
-        # self.grid = Grid(self)
-        # self.mainSizer.Add(self.grid, 1, wx.LEFT | wx.TOP | wx.GROW)
-         # This is to create the grid with same rows as database.
         self.grid_1 = Grid(self)
         self.grid_1.CreateGrid(0, 65)
         self.grid_1.EnableEditing(False)
@@ -196,8 +179,6 @@ class HomePanel(mainPanel):
         plt.plot(t, s)
         plt.ylabel('co2')
         plt.xlabel('year')
-        # plt.show()
-        #plt.savefig()
 
     def onSearch(self, event):
         testRows = self.grid_1.GetNumberRows()
@@ -227,10 +208,7 @@ class AccidentPanel(mainPanel):
     def __init__(self,parent):
         super().__init__(parent=parent)
         self.InitForm(False,"The amount of accidents per hour of the day(on average)")
-        # self.figure = Figure()
-        # self.axes = self.figure.add_subplot(111)
-        # self.canvas = FigureCanvas(self,-1,self.figure)
-        # self.mainSizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
+
         img = wx.EmptyImage(1200, 500)
         img.Replace(0, 0, 0, 255, 255, 255)
         self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(img))
@@ -294,15 +272,7 @@ class AccidentPanel(mainPanel):
 
         plt.savefig('accident.png', dpi=100)
         self.initiatePicture('accident.png')
-        # image_name = 'accident.png'
-        # img = wx.Image(image_name, wx.BITMAP_TYPE_PNG)
-        #
-        # # img = img.Scale(1200,500)
-        # self.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
-        # self.imageCtrl.Refresh()
-        # self.Refresh()
 
-        # plt.show()
 class AlcoholPanel(mainPanel):
     def __init__(self,parent):
         super().__init__(parent=parent)
@@ -311,7 +281,6 @@ class AlcoholPanel(mainPanel):
         img.Replace(0, 0, 0, 255, 255, 255)
         self.imageCtrl = wx.StaticBitmap(self,wx.ID_ANY,wx.BitmapFromImage(img))
         self.mainSizer.Add(self.imageCtrl,0,wx.LEFT | wx.TOP | wx.GROW)
-        # self.panel.mainSizer.Add(self.panel.imageCtrl, 0, wx.ALL | wx.CENTER, 5)
 
         self.SetSizer(self.mainSizer)
         self.mainSizer.Fit(self)
@@ -340,7 +309,6 @@ class AlcoholPanel(mainPanel):
             a = a +1
         for r in yesResult:
             dateDict[r[0]] = r[1]
-            # dateDict[r[1]] = dateDict.get(r[1], 0) + 1
         cursor.execute(
             " select accident_date  from crash  where alcoholtime='No' and accident_date between ? and ? group by accident_date",
             (self.sDate, self.eDate))
@@ -348,7 +316,7 @@ class AlcoholPanel(mainPanel):
         noAchDateDict = dict()
         for r in noResult:
             noAchDateDict[r[0]] = 0
-        # dateDict.update(noAchDateDict)
+
         print(noAchDateDict)
         for key in noAchDateDict.keys():
             if key not in dateDict.keys():
@@ -361,7 +329,7 @@ class AlcoholPanel(mainPanel):
 
 
         connection.close()
-        # xValues = list(dateDict.keys())
+
         xValues = dList
         print(xValues)
         yValues = list(sortedDict.values())
@@ -375,19 +343,12 @@ class AlcoholPanel(mainPanel):
 
         plt.savefig('alcohol.png',dpi=100)
         self.initiatePicture('alcohol.png')
-        # image_name = 'alcohol.png'
-        # img = wx.Image(image_name,wx.BITMAP_TYPE_PNG)
-        #
-        # # img = img.Scale(1200,500)
-        # self.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
-        # self.imageCtrl.Refresh()
-        # self.Refresh()
-        # # plt.show()
+
 class TypePanel(mainPanel):
     def __init__(self,parent):
         super().__init__(parent=parent)
         self.InitForm(False,"Overall number of accidents for each accident type")
-        img = wx.EmptyImage(930, 500)
+        img = wx.EmptyImage(940, 500)
         img.Replace(0, 0, 0, 255, 255, 255)
         self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(img))
 
@@ -399,7 +360,7 @@ class TypePanel(mainPanel):
         self.grid_1.SetColLabelValue(0, 'Type_ID')
         self.grid_1.SetColSize(0, 50)
         self.grid_1.SetColLabelValue(1, 'Accident Type')
-        self.grid_1.SetColSize(1, 230)
+        self.grid_1.SetColSize(1, 220)
         self.grid_1.SetInitialSize((500,500))
         self.grid_1.HideRowLabels()
         self.drawTable()
@@ -409,7 +370,7 @@ class TypePanel(mainPanel):
 
         self.SetSizer(self.mainSizer)
         self.mainSizer.Fit(self)
-        self.initiatePicture('3.png')
+        # self.initiatePicture('3.png')
         self.Layout()
     def drawTable(self):
         connection = connect()
@@ -425,7 +386,6 @@ class TypePanel(mainPanel):
         self.grid_1.AppendRows(r)
 
         for i in range(0, r):
-            # for j in range(0, 1):
             cell = result[i]
             a = i+1
             self.grid_1.SetCellValue(i, 0, str(a))
@@ -458,22 +418,11 @@ class TypePanel(mainPanel):
         plt.ylabel("number of accidents")
 
         figure = plt.gcf()
-        figure.set_size_inches(10, 5)
+        figure.set_size_inches(9.4, 5)
 
         plt.savefig('type.png', dpi=100)
 
         self.initiatePicture('type.png')
-        # image_name = 'type.png'
-        # img = wx.Image(image_name, wx.BITMAP_TYPE_PNG)
-        #
-        # # img = img.Scale(1200,500)
-        # self.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
-        # self.imageCtrl.Refresh()
-        # self.Refresh()
-
-
-
-
 if __name__ == "__main__":
     app = MyApp()
     app.MainLoop()
