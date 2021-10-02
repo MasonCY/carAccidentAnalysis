@@ -37,7 +37,9 @@ def getXvalues():
 
 def plotAccident(yValues,sDate,eDate):
     amValues = yValues[0:12]
-    pmValues = yValues[12:25]
+    pmValues = yValues[12:24]
+    print(amValues)
+    print(pmValues)
     xVlues = getXvalues()
     x_pos,y_pos = getXYPostion()
 

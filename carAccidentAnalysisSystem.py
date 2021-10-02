@@ -1,6 +1,5 @@
 import wx
 import wx.adv
-import matplotlib.pyplot as plt
 from wx.grid import Grid
 from alcoholPanelFunctions import *
 import typePanelFunctions
@@ -9,6 +8,8 @@ import homePanelFunctions
 class MyApp(wx.App):
     def __init__(self):
         super(MyApp, self).__init__(clearSigInt=True)
+        ### loading data
+        initialData()
         self.InitFrame()
     def InitFrame(self):
         frame = MyFrame(parent=None,title="Car accident data analysis system",pos=(20,40),size=(1240,700),)
@@ -16,9 +17,11 @@ class MyApp(wx.App):
 class MyFrame(wx.Frame):
     def __init__(self,parent, title, pos,size):
         super().__init__(parent = parent, title=title,pos=pos,size=size)
+
         self.OnInit()
     def setFrame(self,frame):
         self.frame = frame
+
 
     def OnInit(self):
         panel = wx.Panel(self)
@@ -187,6 +190,7 @@ class AccidentPanel(mainPanel):
                 hourDict[r[1]] = round(r[0]/days,2)
                 # dateDict[r[1]] = dateDict.get(r[1], 0) + 1
             yValues = list(hourDict.values())
+            print(yValues)
 
             accidentPanelFunctions.plotAccident(yValues,self.sDate,self.eDate)
             self.initiatePicture('accident.png')

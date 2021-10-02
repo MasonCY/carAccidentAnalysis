@@ -7,6 +7,15 @@ import typePanelFunctions
 class carAccidentFunctionTest(unittest.TestCase):
     #################################################################
     ####### test all public functions #####################
+    def test_importCsvIntoSqlite(self):
+        with self.assertRaises(FileNotFoundError): publicFuctions.importCsvIntoSqlite('111')
+
+    def test_convertDateFormat(self):
+        fomatedDate = publicFuctions.convertDateFormat('1/2/2013')
+        self.assertEqual(fomatedDate,'2013/02/01')
+    def test_extractHour(self):
+        hour = publicFuctions.extractHour('09:20:21')
+        self.assertEqual(hour,'09')
     def test_getAllData(self):
         self.assertNotEqual(publicFuctions.getAllData(), [])
     def test_getMaxDate(self):
@@ -39,7 +48,9 @@ class carAccidentFunctionTest(unittest.TestCase):
         # self.assertFalse(publicFuctions.dateCheck('2018/01/05','2018/01/01'))
 
     def test_getColNameList(self):
-        self.assertEqual(len(publicFuctions.getColNameList()),63)
+        clist = publicFuctions.getColNameList()
+        print(clist)
+        self.assertEqual(len(clist),63)
     def test_data_rows_count(self):
         rows1 = publicFuctions.data_rows_count([1,2,3])
         rows2 = publicFuctions.data_rows_count([[1,2,3],[2,3,4]])
@@ -69,6 +80,7 @@ class carAccidentFunctionTest(unittest.TestCase):
         hourDict1 = {'00' : 0, '01' : 0}
         hourDict2 = {'00': 0, '01': 0, '02': 0}
         hourDict3 = {'00': 0, '01': 0, '02': 0, '03':0 }
+        print(accidentPanelFunctions.hoursDictGenerate(24))
         self.assertDictEqual(accidentPanelFunctions.hoursDictGenerate(2),hourDict1)
         self.assertDictEqual(accidentPanelFunctions.hoursDictGenerate(3),hourDict2)
         self.assertDictEqual(accidentPanelFunctions.hoursDictGenerate(4),hourDict3)
